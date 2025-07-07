@@ -1,20 +1,24 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
   createOrder,
   listOrders,
   getOrderById,
   createOrderSchema,
-} from "../controllers/ordersController.js";
-import { validateData } from "../middlewares/validationMiddleware.js";
-import { verifyToken } from "../middlewares/authMiddleware.js";
+} from '../controllers/ordersController.js';
+import { validateData } from '../middlewares/validationMiddleware.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
+import {
+  orderLimiter,
+  defaultLimiter,
+} from '../middlewares/rateLimitMiddleware.js';
 
 const router = Router();
 
 // Protected routes (require authentication)
 router.use(verifyToken);
 
-router.post("/", validateData(createOrderSchema), createOrder);
-router.get("/", listOrders);
-router.get("/:id", getOrderById);
+router.post('/', orderLimiter, validateData(createOrderSchema), createOrder);
+router.get('/', defaultLimiter, listOrders);
+router.get('/:id', defaultLimiter, getOrderById);
 
 export default router;

@@ -1,8 +1,9 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import * as schema from './schema';
 
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL!,
-});
+console.log('Initializing database connection...');
 
-export const db = drizzle(pool);
+// Use pooled connection for query building
+export const queryClient = postgres(process.env.DATABASE_URL!, { max: 1 });
+export const db = drizzle(queryClient, { schema });

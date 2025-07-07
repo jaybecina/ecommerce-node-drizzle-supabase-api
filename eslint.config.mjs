@@ -1,10 +1,10 @@
 /* eslint-env node */
 
-const js = require("@eslint/js");
-const tseslint = require("@typescript-eslint/eslint-plugin");
-const tsparser = require("@typescript-eslint/parser");
+import js from "@eslint/js";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsparser from "@typescript-eslint/parser";
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     files: ["**/*.ts", "**/*.tsx"],

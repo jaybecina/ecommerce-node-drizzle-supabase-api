@@ -1,36 +1,27 @@
-import express, { json, urlencoded, Request } from 'express';
-import productsRoutes from './routes/productRoute';
-import authRoutes from './routes/authRoute';
-import ordersRoutes from './routes/orderRoute';
-import stripeRoutes from './routes/stripeRoute';
+import dotenv from 'dotenv';
+dotenv.config();
 
+import express, { urlencoded } from 'express';
+import cors from 'cors';
+import routes from './routes';
 import serverless from 'serverless-http';
 
 const port = process.env.PORT || 8000;
 const app = express();
 
 app.use(urlencoded({ extended: false }));
-app.use(
-  json({
-    verify: (req: Request, res, buf) => {
-      req.rawBody = buf;
-    },
-  }),
-);
+app.use(cors());
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.use('/products', productsRoutes);
-app.use('/auth', authRoutes);
-app.use('/orders', ordersRoutes);
-app.use('/stripe', stripeRoutes);
+// Routes
+app.use('/api', routes);
 
-if (process.env.NODE_ENV === 'dev') {
-  app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-  });
-}
+app.listen(port, () => {
+  console.log(`Server API listening on port ${port}`);
+});
 
 export const handler = serverless(app);

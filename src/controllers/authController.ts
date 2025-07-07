@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase.js';
-import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 
 // Validation schemas
@@ -78,29 +77,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET is not configured');
-    }
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.user_metadata.role,
-        name: user.user_metadata.name,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' },
-    );
-
-    // Set token as HTTP-only cookie for better security
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-
     res.json({
       user: {
         id: user.id,
@@ -108,6 +84,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         name: user.user_metadata.name,
         role: user.user_metadata.role,
       },
+      token: session.access_token,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -128,7 +105,9 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({ message: 'Logged out successfully' });
+    res.json({
+      message: 'Logged out successfully',
+    });
   } catch (error) {
     console.error('Auth error:', error);
     res.status(401).json({

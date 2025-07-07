@@ -1,13 +1,7 @@
-import {
-  integer,
-  pgTable,
-  varchar,
-  text,
-  doublePrecision,
-} from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import { integer, pgTable, varchar, text, doublePrecision } from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-zod';
 
-export const productsTable = pgTable("products", {
+export const productsTable = pgTable('products', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
   description: text(),

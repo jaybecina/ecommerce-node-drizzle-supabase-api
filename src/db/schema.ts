@@ -1,3 +1,3 @@
-import * as productsSchema from "./productsSchema";
+import * as productsSchema from './productsSchema';
 
 export default { ...productsSchema };

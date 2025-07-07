@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
-import { db } from "../db/index.js";
-import { orderItemsTable, ordersTable } from "../db/ordersSchema.js";
-import { productsTable } from "../db/productsSchema.js";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
+import { Request, Response } from 'express';
+import { db } from '../db/index.js';
+import { orderItemsTable, ordersTable } from '../db/ordersSchema.js';
+import { productsTable } from '../db/productsSchema.js';
+import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 
 // Validation schemas
 export const createOrderSchema = z.object({
@@ -11,25 +11,22 @@ export const createOrderSchema = z.object({
     z.object({
       productId: z.number(),
       quantity: z.number().positive(),
-    })
+    }),
   ),
 });
 
 // Controller methods
-export const createOrder = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
     const orderData = createOrderSchema.parse(req.body);
 
     if (!req.user?.id) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
     if (orderData.items.length === 0) {
-      res.status(400).json({ error: "Order must contain at least one item" });
+      res.status(400).json({ error: 'Order must contain at least one item' });
       return;
     }
 
@@ -41,7 +38,7 @@ export const createOrder = async (
           .insert(ordersTable)
           .values({
             userId: Number(req.user!.id),
-            status: "pending",
+            status: 'pending',
           })
           .returning();
 
@@ -73,7 +70,7 @@ export const createOrder = async (
               .returning();
 
             return orderItem;
-          })
+          }),
         );
 
         res.status(201).json({
@@ -83,7 +80,7 @@ export const createOrder = async (
       });
     } catch (txError) {
       if (txError instanceof Error) {
-        if (txError.message.includes("not found")) {
+        if (txError.message.includes('not found')) {
           res.status(404).json({ error: txError.message });
           return;
         }
@@ -95,18 +92,15 @@ export const createOrder = async (
       res.status(400).json({ error: error.errors });
       return;
     }
-    console.error("Order creation error:", error);
-    res.status(500).json({ error: "Failed to create order" });
+    console.error('Order creation error:', error);
+    res.status(500).json({ error: 'Failed to create order' });
   }
 };
 
-export const listOrders = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const listOrders = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user?.id) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -123,33 +117,27 @@ export const listOrders = async (
           .where(eq(orderItemsTable.orderId, order.id));
 
         // Calculate total for each order
-        const orderTotal = items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        );
+        const orderTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
         return {
           ...order,
           orderTotal,
           items,
         };
-      })
+      }),
     );
 
     res.json(ordersWithItems);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch orders" });
+    res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };
 
-export const getOrderById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getOrderById = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user?.id) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -160,12 +148,12 @@ export const getOrderById = async (
       .where(eq(ordersTable.id, Number(id)));
 
     if (!order) {
-      res.status(404).json({ error: "Order not found" });
+      res.status(404).json({ error: 'Order not found' });
       return;
     }
 
     if (order.userId !== Number(req.user.id)) {
-      res.status(403).json({ error: "Not authorized to view this order" });
+      res.status(403).json({ error: 'Not authorized to view this order' });
       return;
     }
 
@@ -175,10 +163,7 @@ export const getOrderById = async (
       .where(eq(orderItemsTable.orderId, order.id));
 
     // Calculate total
-    const orderTotal = items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const orderTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     res.json({
       ...order,
@@ -187,6 +172,6 @@ export const getOrderById = async (
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch order" });
+    res.status(500).json({ error: 'Failed to fetch order' });
   }
 };

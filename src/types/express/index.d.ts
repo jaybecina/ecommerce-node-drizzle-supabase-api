@@ -1,13 +1,19 @@
-// to make the file a module and avoid the TypeScript error
-export {};
+import 'express';
 
-declare global {
-  namespace Express {
-    export interface Request {
-      userId?: Number;
-      cleanBody?: any;
+declare module 'express' {
+  // eslint-disable-next-line no-unused-vars
+  interface Request {
+    /** Used by validation middleware to store cleaned request body */
+    cleanBody?: any;
+
+    /** Raw body buffer, required for Stripe webhook signature verification */
+    rawBody?: Buffer;
+
+    /** Authenticated user information, set by auth middleware */
+    user?: {
+      id: string;
+      email: string;
       role: string;
-      rawBody?: Buffer;
-    }
+    };
   }
 }

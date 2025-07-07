@@ -1,14 +1,14 @@
-import { Request, Response } from "express";
-import { supabase } from "../config/supabase.js";
-import jwt from "jsonwebtoken";
-import { z } from "zod";
+import { Request, Response } from 'express';
+import { supabase } from '../config/supabase.js';
+import jwt from 'jsonwebtoken';
+import { z } from 'zod';
 
 // Validation schemas
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   name: z.string().min(2),
-  role: z.enum(["buyer", "seller"]),
+  role: z.enum(['buyer', 'seller']),
 });
 
 const loginSchema = z.object({
@@ -38,7 +38,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.status(201).json({
-      message: "User registered successfully",
+      message: 'User registered successfully',
       user: {
         id: authData.user?.id,
         email: authData.user?.email,
@@ -51,7 +51,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: error.errors });
       return;
     }
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
     return;
   }
 };
@@ -74,12 +74,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (!user || !session) {
-      res.status(401).json({ error: "Invalid credentials" });
+      res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
 
     if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not configured");
+      throw new Error('JWT_SECRET is not configured');
     }
 
     const token = jwt.sign(
@@ -90,14 +90,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         name: user.user_metadata.name,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: '24h' },
     );
 
     // Set token as HTTP-only cookie for better security
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
@@ -115,7 +115,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -128,9 +128,13 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({ message: "Logged out successfully" });
+    res.json({ message: 'Logged out successfully' });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Auth error:', error);
+    res.status(401).json({
+      error: 'Invalid token',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
     return;
   }
 };

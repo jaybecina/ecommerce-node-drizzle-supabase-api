@@ -1,9 +1,8 @@
-import { Request, Response } from "express";
-import { db } from "../db/index.js";
-import { productsTable } from "../db/productsSchema.js";
-import { eq } from "drizzle-orm";
-import _ from "lodash";
-import { z } from "zod";
+import { Request, Response } from 'express';
+import { db } from '../db/index.js';
+import { productsTable } from '../db/productsSchema.js';
+import { eq } from 'drizzle-orm';
+import { z } from 'zod';
 
 // Validation schemas
 export const createProductSchema = z.object({
@@ -17,23 +16,17 @@ export const createProductSchema = z.object({
 export const updateProductSchema = createProductSchema.partial();
 
 // Controller methods
-export const listProducts = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const listProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const products = await db.select().from(productsTable);
     res.json(products);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch products" });
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
 };
 
-export const getProductById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const [product] = await db
@@ -42,26 +35,23 @@ export const getProductById = async (
       .where(eq(productsTable.id, Number(id)));
 
     if (!product) {
-      res.status(404).json({ error: "Product not found" });
+      res.status(404).json({ error: 'Product not found' });
       return;
     }
 
     res.json(product);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch product" });
+    res.status(500).json({ error: 'Failed to fetch product' });
   }
 };
 
-export const createProduct = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const productData = createProductSchema.parse(req.body);
 
     if (!req.user?.id) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -77,20 +67,17 @@ export const createProduct = async (
       return;
     }
     console.error(error);
-    res.status(500).json({ error: "Failed to create product" });
+    res.status(500).json({ error: 'Failed to create product' });
   }
 };
 
-export const updateProduct = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const updateData = updateProductSchema.parse(req.body);
 
     if (!req.user?.id) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -101,12 +88,12 @@ export const updateProduct = async (
       .where(eq(productsTable.id, Number(id)));
 
     if (!existingProduct) {
-      res.status(404).json({ error: "Product not found" });
+      res.status(404).json({ error: 'Product not found' });
       return;
     }
 
     if (existingProduct.sellerId !== Number(req.user.id)) {
-      res.status(403).json({ error: "Not authorized to update this product" });
+      res.status(403).json({ error: 'Not authorized to update this product' });
       return;
     }
 
@@ -123,19 +110,16 @@ export const updateProduct = async (
       return;
     }
     console.error(error);
-    res.status(500).json({ error: "Failed to update product" });
+    res.status(500).json({ error: 'Failed to update product' });
   }
 };
 
-export const deleteProduct = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
     if (!req.user?.id) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
@@ -146,12 +130,12 @@ export const deleteProduct = async (
       .where(eq(productsTable.id, Number(id)));
 
     if (!existingProduct) {
-      res.status(404).json({ error: "Product not found" });
+      res.status(404).json({ error: 'Product not found' });
       return;
     }
 
     if (existingProduct.sellerId !== Number(req.user.id)) {
-      res.status(403).json({ error: "Not authorized to delete this product" });
+      res.status(403).json({ error: 'Not authorized to delete this product' });
       return;
     }
 
@@ -160,6 +144,6 @@ export const deleteProduct = async (
     res.status(204).end();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to delete product" });
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 };

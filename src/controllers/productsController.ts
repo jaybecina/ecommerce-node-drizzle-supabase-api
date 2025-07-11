@@ -1,24 +1,19 @@
 import { Request, Response } from 'express';
-import { db } from '../db/index.js';
-import { productsTable } from '../db/productsSchema.js';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-
-// Validation schemas
-export const createProductSchema = z.object({
-  name: z.string().min(1),
-  description: z.string(),
-  price: z.number().positive(),
-  image: z.string().url().optional(),
-  sellerId: z.number(),
-});
-
-export const updateProductSchema = createProductSchema.partial();
+import {
+  listProductsService,
+  getProductByIdService,
+  createProductService,
+  updateProductService,
+  deleteProductService,
+  createProductSchema,
+  updateProductSchema,
+} from '../services/productsService.js';
 
 // Controller methods
 export const listProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const products = await db.select().from(productsTable);
+    const products = await listProductsService();
     res.json(products);
   } catch (error) {
     console.error(error);
@@ -29,20 +24,11 @@ export const listProducts = async (req: Request, res: Response): Promise<void> =
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const [product] = await db
-      .select()
-      .from(productsTable)
-      .where(eq(productsTable.id, Number(id)));
-
-    if (!product) {
-      res.status(404).json({ error: 'Product not found' });
-      return;
-    }
-
+    const product = await getProductByIdService(Number(id));
     res.json(product);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to fetch product' });
+    res.status(404).json({ error: (error as Error).message });
   }
 };
 
@@ -55,11 +41,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const [product] = await db
-      .insert(productsTable)
-      .values({ ...productData, sellerId: Number(req.user.id) })
-      .returning();
-
+    const product = await createProductService(productData, Number(req.user.id));
     res.status(201).json(product);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -81,28 +63,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Check if the product exists and belongs to the seller
-    const [existingProduct] = await db
-      .select()
-      .from(productsTable)
-      .where(eq(productsTable.id, Number(id)));
-
-    if (!existingProduct) {
-      res.status(404).json({ error: 'Product not found' });
-      return;
-    }
-
-    if (existingProduct.sellerId !== Number(req.user.id)) {
-      res.status(403).json({ error: 'Not authorized to update this product' });
-      return;
-    }
-
-    const [updated] = await db
-      .update(productsTable)
-      .set(updateData)
-      .where(eq(productsTable.id, Number(id)))
-      .returning();
-
+    const updated = await updateProductService(Number(id), updateData, Number(req.user.id));
     res.json(updated);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -110,7 +71,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
     console.error(error);
-    res.status(500).json({ error: 'Failed to update product' });
+    res.status(500).json({ error: (error as Error).message || 'Failed to update product' });
   }
 };
 
@@ -123,27 +84,10 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Check if the product exists and belongs to the seller
-    const [existingProduct] = await db
-      .select()
-      .from(productsTable)
-      .where(eq(productsTable.id, Number(id)));
-
-    if (!existingProduct) {
-      res.status(404).json({ error: 'Product not found' });
-      return;
-    }
-
-    if (existingProduct.sellerId !== Number(req.user.id)) {
-      res.status(403).json({ error: 'Not authorized to delete this product' });
-      return;
-    }
-
-    await db.delete(productsTable).where(eq(productsTable.id, Number(id)));
-
+    await deleteProductService(Number(id), Number(req.user.id));
     res.status(204).end();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to delete product' });
+    res.status(500).json({ error: (error as Error).message || 'Failed to delete product' });
   }
 };

@@ -5,9 +5,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  createProductSchema,
-  updateProductSchema,
 } from '../controllers/productsController.js';
+import { createProductSchema, updateProductSchema } from '../services/productsService.js';
 import { validateData } from '../middlewares/validationMiddleware.js';
 import { verifySeller, verifyToken } from '../middlewares/authMiddleware.js';
 import { defaultLimiter } from '../middlewares/rateLimitMiddleware.js';
@@ -22,7 +21,7 @@ router.post(
   verifyToken,
   verifySeller,
   validateData(createProductSchema),
-  createProduct
+  createProduct,
 );
 router.put(
   '/:id',
@@ -30,7 +29,7 @@ router.put(
   verifyToken,
   verifySeller,
   validateData(updateProductSchema),
-  updateProduct
+  updateProduct,
 );
 router.delete('/:id', defaultLimiter, verifyToken, verifySeller, deleteProduct);
 

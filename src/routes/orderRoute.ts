@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { createOrder, listOrders, getOrderById } from '../controllers/ordersController.js';
-import { createOrderSchema } from '../services/ordersService.js';
-import { validateData } from '../middlewares/validationMiddleware.js';
-import { verifyToken } from '../middlewares/authMiddleware.js';
-import { orderLimiter, defaultLimiter } from '../middlewares/rateLimitMiddleware.js';
+import { createOrder, listOrders, getOrderById } from '../controllers/ordersController';
+import { createOrderSchema } from '../services/ordersService';
+import { validateData } from '../middlewares/validationMiddleware';
+import { verifyToken } from '../middlewares/authMiddleware';
+import { orderLimiter, defaultLimiter } from '../middlewares/rateLimitMiddleware';
 
 const router = Router();
 

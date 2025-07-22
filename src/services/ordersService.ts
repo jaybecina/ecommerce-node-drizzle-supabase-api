@@ -1,6 +1,6 @@
-import { db } from '../db/index.js';
-import { orderItemsTable, ordersTable } from '../db/ordersSchema.js';
-import { productsTable } from '../db/productsSchema.js';
+import { db } from '../db/index';
+import { orderItemsTable, ordersTable } from '../db/ordersSchema';
+import { productsTable } from '../db/productsSchema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 

@@ -6,7 +6,7 @@ import {
   logoutService,
   registerSchema,
   loginSchema,
-} from '../services/authService.js';
+} from '../services/authService';
 
 // Controller methods
 export const register = async (req: Request, res: Response): Promise<void> => {

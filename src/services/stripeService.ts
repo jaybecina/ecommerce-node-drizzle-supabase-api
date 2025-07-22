@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { db } from '../db/index.js';
-import { orderItemsTable, ordersTable } from '../db/ordersSchema.js';
+import { db } from '../db/index';
+import { orderItemsTable, ordersTable } from '../db/ordersSchema';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);

@@ -1,5 +1,5 @@
-import { db } from '../db/index.js';
-import { productsTable } from '../db/productsSchema.js';
+import { db } from '../db/index';
+import { productsTable } from '../db/productsSchema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 

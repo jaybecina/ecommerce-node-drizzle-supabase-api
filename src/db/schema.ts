@@ -1,3 +1,6 @@
-import * as productsSchema from './productsSchema';
+import { productsTable } from './productsSchema';
+import { usersTable } from './usersSchema';
+import { ordersTable, orderItemsTable } from './ordersSchema';
+import { testTable } from './testSchema';
 
-export default { ...productsSchema };
+export { productsTable, usersTable, ordersTable, orderItemsTable, testTable };

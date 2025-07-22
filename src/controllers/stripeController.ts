@@ -3,7 +3,7 @@ import {
   getPublishableKey,
   createPaymentIntentService,
   handleWebhookEvent,
-} from '../services/stripeService.js';
+} from '../services/stripeService';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);

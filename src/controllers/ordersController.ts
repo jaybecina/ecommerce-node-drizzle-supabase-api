@@ -5,7 +5,7 @@ import {
   listOrdersService,
   getOrderByIdService,
   createOrderSchema,
-} from '../services/ordersService.js';
+} from '../services/ordersService';
 
 // Controller methods
 export const createOrder = async (req: Request, res: Response): Promise<void> => {

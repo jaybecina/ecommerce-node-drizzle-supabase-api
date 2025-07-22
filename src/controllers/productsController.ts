@@ -8,7 +8,7 @@ import {
   deleteProductService,
   createProductSchema,
   updateProductSchema,
-} from '../services/productsService.js';
+} from '../services/productsService';
 
 // Controller methods
 export const listProducts = async (req: Request, res: Response): Promise<void> => {

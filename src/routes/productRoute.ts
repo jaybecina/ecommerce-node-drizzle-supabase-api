@@ -5,11 +5,11 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-} from '../controllers/productsController.js';
-import { createProductSchema, updateProductSchema } from '../services/productsService.js';
-import { validateData } from '../middlewares/validationMiddleware.js';
-import { verifySeller, verifyToken } from '../middlewares/authMiddleware.js';
-import { defaultLimiter } from '../middlewares/rateLimitMiddleware.js';
+} from '../controllers/productsController';
+import { createProductSchema, updateProductSchema } from '../services/productsService';
+import { validateData } from '../middlewares/validationMiddleware';
+import { verifySeller, verifyToken } from '../middlewares/authMiddleware';
+import { defaultLimiter } from '../middlewares/rateLimitMiddleware';
 
 const router = Router();
 

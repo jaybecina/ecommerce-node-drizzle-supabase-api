@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "order_items" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "orders" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "orders_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"user_id" integer,
+	"user_id" varchar(255),
 	"status" varchar(50) NOT NULL,
 	"total_amount" double precision NOT NULL,
 	"created_at" varchar(255) NOT NULL,
@@ -30,10 +30,10 @@ CREATE TABLE IF NOT EXISTS "test_table" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
-	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "users_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"email" varchar(255) NOT NULL,
-	"username" varchar(255) NOT NULL,
-	"password" varchar(255) NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"role" varchar(50) NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint

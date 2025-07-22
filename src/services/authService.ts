@@ -1,5 +1,7 @@
 import { supabase } from '../config/supabase';
 import { z } from 'zod';
+import { db } from '../db';
+import { usersTable } from '../db/usersSchema';
 
 export const registerSchema = z.object({
   email: z.string().email(),
@@ -29,6 +31,24 @@ export async function registerService(data: z.infer<typeof registerSchema>) {
 
   if (authError) {
     throw new Error(authError.message);
+  }
+
+  // Create user in Drizzle database
+  try {
+    if (!authData.user?.id) {
+      throw new Error('No user ID returned from Supabase');
+    }
+
+    await db.insert(usersTable).values({
+      id: authData.user.id,
+      email: email,
+      name: name,
+      role: role,
+    });
+  } catch (dbError) {
+    // If database insertion fails, we should clean up the Supabase user
+    await supabase.auth.admin.deleteUser(authData.user!.id);
+    throw new Error('Failed to create user in database: ' + (dbError as Error).message);
   }
 
   return {

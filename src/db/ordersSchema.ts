@@ -4,7 +4,7 @@ import { productsTable } from './productsSchema';
 
 export const ordersTable = pgTable('orders', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer('user_id').references(() => usersTable.id),
+  userId: varchar('user_id', { length: 255 }).references(() => usersTable.id),
   status: varchar('status', { length: 50 }).notNull(),
   totalAmount: doublePrecision('total_amount').notNull(),
   createdAt: varchar('created_at', { length: 255 }).notNull(),

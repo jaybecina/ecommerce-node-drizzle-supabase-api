@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import multer from 'multer';
 import {
   listProductsService,
   getProductByIdService,
@@ -9,6 +10,20 @@ import {
   createProductSchema,
   updateProductSchema,
 } from '../services/productsService';
+
+// Configure multer for memory storage
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error('Only image files are allowed!'));
+    }
+    cb(null, true);
+  },
+});
 
 // Controller methods
 export const listProducts = async (req: Request, res: Response): Promise<void> => {
@@ -34,14 +49,30 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
 
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const productData = createProductSchema.parse(req.body);
+    const productData = createProductSchema.parse({
+      ...req.body,
+      price: Number(req.body.price),
+      image: req.file,
+    });
 
     if (!req.user?.id) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    const product = await createProductService(productData, Number(req.user.id));
+    const product = await createProductService(
+      {
+        ...productData,
+        image: req.file
+          ? {
+              buffer: req.file.buffer,
+              originalname: req.file.originalname,
+            }
+          : undefined,
+      },
+      Number(req.user.id),
+    );
+
     res.status(201).json(product);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -56,14 +87,30 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const updateData = updateProductSchema.parse(req.body);
+    const updateData = updateProductSchema.parse({
+      ...req.body,
+      price: req.body.price ? Number(req.body.price) : undefined,
+      image: req.file,
+    });
 
     if (!req.user?.id) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    const updated = await updateProductService(Number(id), updateData, Number(req.user.id));
+    const updated = await updateProductService(
+      Number(id),
+      {
+        ...updateData,
+        image: req.file
+          ? {
+              buffer: req.file.buffer,
+              originalname: req.file.originalname,
+            }
+          : undefined,
+      },
+      Number(req.user.id),
+    );
     res.json(updated);
   } catch (error) {
     if (error instanceof z.ZodError) {

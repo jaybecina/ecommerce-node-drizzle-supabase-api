@@ -13,7 +13,8 @@ declare module 'express' {
     user?: {
       id: string;
       email: string;
-      role: string;
+      roles: string[];
+      permissions: string[];
     };
   }
 }

@@ -2,12 +2,13 @@ import { db } from '../db/index';
 import { productsTable } from '../db/productsSchema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { uploadProductImage, deleteProductImage } from './uploadService';
 
 export const createProductSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
   price: z.number().positive(),
-  image: z.string().url().optional(),
+  image: z.any().optional(), // Changed to any to accept file upload
   sellerId: z.number(),
 });
 
@@ -28,12 +29,24 @@ export async function getProductByIdService(id: number) {
 }
 
 export async function createProductService(
-  productData: z.infer<typeof createProductSchema>,
+  productData: z.infer<typeof createProductSchema> & {
+    image?: { buffer: Buffer; originalname: string };
+  },
   userId: number,
 ) {
+  let imageUrl: string | undefined;
+
+  if (productData.image?.buffer) {
+    imageUrl = await uploadProductImage(productData.image.buffer, productData.image.originalname);
+  }
+
   const [product] = await db
     .insert(productsTable)
-    .values({ ...productData, sellerId: userId })
+    .values({
+      ...productData,
+      sellerId: userId,
+      image: imageUrl,
+    })
     .returning();
 
   return product;
@@ -41,7 +54,9 @@ export async function createProductService(
 
 export async function updateProductService(
   id: number,
-  updateData: z.infer<typeof updateProductSchema>,
+  updateData: z.infer<typeof updateProductSchema> & {
+    image?: { buffer: Buffer; originalname: string };
+  },
   userId: number,
 ) {
   const [existingProduct] = await db.select().from(productsTable).where(eq(productsTable.id, id));
@@ -52,6 +67,19 @@ export async function updateProductService(
 
   if (existingProduct.sellerId !== userId) {
     throw new Error('Not authorized to update this product');
+  }
+
+  let imageUrl: string | undefined;
+
+  if (updateData.image?.buffer) {
+    // Delete old image if it exists
+    if (existingProduct.image) {
+      await deleteProductImage(existingProduct.image);
+    }
+
+    // Upload new image
+    imageUrl = await uploadProductImage(updateData.image.buffer, updateData.image.originalname);
+    updateData.image = imageUrl;
   }
 
   const [updated] = await db

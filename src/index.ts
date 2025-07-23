@@ -5,6 +5,7 @@ import express, { urlencoded } from 'express';
 import cors from 'cors';
 import routes from './routes';
 import serverless from 'serverless-http';
+import { ensureStorageBucket } from './services/storageService';
 
 const port = process.env.PORT || 8000;
 const app = express();
@@ -20,8 +21,15 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api', routes);
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Server API listening on port ${port}`);
+
+  try {
+    await ensureStorageBucket();
+    console.log('Storage bucket setup completed');
+  } catch (error) {
+    console.error('Failed to setup storage bucket:', error);
+  }
 });
 
 export const handler = serverless(app);

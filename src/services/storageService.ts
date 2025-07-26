@@ -1,9 +1,9 @@
-import { supabase } from '../config/supabase';
+import { supabaseService } from '../config/supabase';
 
 export async function ensureStorageBucket() {
   try {
     // Check if the bucket exists
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    const { data: buckets, error: listError } = await supabaseService.storage.listBuckets();
 
     if (listError) {
       throw listError;
@@ -13,7 +13,7 @@ export async function ensureStorageBucket() {
 
     if (!productsBucketExists) {
       // Create the products bucket
-      const { error: createError } = await supabase.storage.createBucket('products', {
+      const { error: createError } = await supabaseService.storage.createBucket('products', {
         public: true,
         fileSizeLimit: 5242880, // 5MB in bytes
       });

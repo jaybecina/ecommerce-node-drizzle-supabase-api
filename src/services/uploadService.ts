@@ -1,11 +1,16 @@
 import { supabase } from '../config/supabase';
 import { randomUUID } from 'crypto';
 
-export async function uploadProductImage(imageFile: Buffer, originalFilename: string) {
+// Accepts productUuid to store image in products/{uuid}/filename.ext
+export async function uploadProductImage(
+  imageFile: Buffer,
+  originalFilename: string,
+  productUuid: string,
+) {
   try {
     const fileExt = originalFilename.split('.').pop();
     const fileName = `${randomUUID()}.${fileExt}`;
-    const bucketPath = `products/${fileName}`;
+    const bucketPath = `products/${productUuid}/${fileName}`;
 
     const {
       data: { user },

@@ -28,6 +28,8 @@ export async function getProductByIdService(id: number) {
   return product;
 }
 
+import { randomUUID } from 'crypto';
+
 export async function createProductService(
   productData: z.infer<typeof createProductSchema> & {
     image?: { buffer: Buffer; originalname: string };
@@ -35,9 +37,15 @@ export async function createProductService(
   userId: number,
 ) {
   let imageUrl: string | undefined;
+  // Generate a UUID for the product folder
+  const productUuid = randomUUID();
 
   if (productData.image?.buffer) {
-    imageUrl = await uploadProductImage(productData.image.buffer, productData.image.originalname);
+    imageUrl = await uploadProductImage(
+      productData.image.buffer,
+      productData.image.originalname,
+      productUuid,
+    );
   }
 
   const [product] = await db
@@ -46,6 +54,7 @@ export async function createProductService(
       ...productData,
       sellerId: userId,
       image: imageUrl,
+      uuid: productUuid, // You may need to add this field to your schema if not present
     })
     .returning();
 
@@ -71,20 +80,27 @@ export async function updateProductService(
 
   let imageUrl: string | undefined;
 
+  // Use the existing product's uuid or generate if missing
+  const productUuid = existingProduct.uuid || randomUUID();
+
   if (updateData.image?.buffer) {
     // Delete old image if it exists
     if (existingProduct.image) {
       await deleteProductImage(existingProduct.image);
     }
 
-    // Upload new image
-    imageUrl = await uploadProductImage(updateData.image.buffer, updateData.image.originalname);
+    // Upload new image to the product's folder
+    imageUrl = await uploadProductImage(
+      updateData.image.buffer,
+      updateData.image.originalname,
+      productUuid,
+    );
     updateData.image = imageUrl;
   }
 
   const [updated] = await db
     .update(productsTable)
-    .set(updateData)
+    .set({ ...updateData, uuid: productUuid })
     .where(eq(productsTable.id, id))
     .returning();
 

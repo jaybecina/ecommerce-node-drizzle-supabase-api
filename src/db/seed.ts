@@ -3,12 +3,15 @@ import postgres from 'postgres';
 import { rolesTable, userRolesTable } from './rolesSchema';
 import { permissionsTable, rolePermissionsTable } from './permissionsSchema';
 import { supabase } from '../config/supabase';
+import { usersTable } from './usersSchema';
 import { eq } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 
 const seedDatabase = async () => {
+  const queryClient = postgres(process.env.DATABASE_URL!);
+  const db = drizzle(queryClient);
   const adminEmail = 'admin@admin.com';
-  const adminPassword = 'admin';
+  const adminPassword = 'admin123';
 
   const { data: existingUser } = await supabase
     .from('users')
@@ -34,7 +37,8 @@ const seedDatabase = async () => {
 
     adminId = user!.id;
 
-    await supabase.from('users').insert({
+    // Insert into Drizzle users table
+    await db.insert(usersTable).values({
       id: adminId,
       email: adminEmail,
       name: 'Admin User',
@@ -42,9 +46,6 @@ const seedDatabase = async () => {
   } else {
     adminId = existingUser.id;
   }
-
-  const queryClient = postgres(process.env.DATABASE_URL!);
-  const db = drizzle(queryClient);
 
   const rolesList = [
     { id: randomUUID(), name: 'admin', description: 'Administrator with full access' },

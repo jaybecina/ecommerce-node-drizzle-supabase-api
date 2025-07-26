@@ -1,5 +1,5 @@
 {
-  "id": "a9dac910-a0b2-40f4-adcc-341232b7ed57",
+  "id": "4b10b0d6-a9b0-4475-8af7-a34fa3557988",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -224,6 +224,12 @@
             "cycle": false
           }
         },
+        "uuid": {
+          "name": "uuid",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -258,7 +264,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "products_uuid_unique": {
+          "name": "products_uuid_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "uuid"
+          ]
+        }
+      }
     },
     "public.role_permissions": {
       "name": "role_permissions",
